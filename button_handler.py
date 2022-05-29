@@ -7,10 +7,10 @@ from tts import tts, checkInternet,blurCheck
 from time import sleep
 from audio import play_audio
 import cv2
-
+usecam = True
 class ButtonHandler:
     def __init__(self):
-        self.state = State.DocOCR
+        self.state = State.CloudOCR
         self.currProc = Process(target=self.perform_doc_ocr)
         self.observer = SubprocessObserver()
         
@@ -20,9 +20,10 @@ class ButtonHandler:
         
     def perform_doc_ocr(self):
         # cmd = "libcamera-jpeg -o " + INPUT_IMAGE_PATH + " -t 1000 --width 2500 --height 2500"
-        cmd = "fswebcam -d /dev/video0 -r 2500x2500 -v -S 10 --set brightness=100% --no-banner " + INPUT_IMAGE_PATH
-        p = self.create(cmd)
-        p.wait()
+        if usecam:
+            cmd = "fswebcam -d /dev/video0 -r 2500x2500 -v -S 10 --set brightness=100% --no-banner " + INPUT_IMAGE_PATH
+            p = self.create(cmd)
+            p.wait()
         # Creating a scan of the input image
         doc_scan.scan(INPUT_IMAGE_PATH, OUTPUT_IMAGE_PATH)
 
@@ -36,10 +37,12 @@ class ButtonHandler:
             print(f"No text detected")
             self.create("sudo mpg321 ./audios/noText.mp3")
     
+    #for billboards and far away text
     def perform_scene_ocr(self):        
-        cmd = "fswebcam -d /dev/video0 -r 960x960 -v -S 10 --set brightness=100% --no-banner " + INPUT_IMAGE_PATH
-        p = self.create(cmd)
-        p.wait()
+        if usecam:
+            cmd = "fswebcam -d /dev/video0 -r 960x960 -v -S 10 --set brightness=100% --no-banner " + INPUT_IMAGE_PATH
+            p = self.create(cmd)
+            p.wait()
         string = scene_ocr.ocr()
         if(len(string) > 3):
             print(f"string = {string}")
@@ -49,10 +52,12 @@ class ButtonHandler:
             print(f"No text detected")
             self.create("sudo mpg321 ./audios/noText.mp3")
     
+    #describe a scene near you.
     def perform_scene_desc(self):        
-        cmd = "fswebcam -d /dev/video0 -r 960x960 -v -S 10 --set brightness=100% --no-banner " + INPUT_IMAGE_PATH
-        p = self.create(cmd)
-        p.wait()
+        if usecam:
+            cmd = "fswebcam -d /dev/video0 -r 960x960 -v -S 10 --set brightness=100% --no-banner " + INPUT_IMAGE_PATH
+            p = self.create(cmd)
+            p.wait()
         string = scene_desc.describe(cv.imread(INPUT_IMAGE_PATH))
         if(len(string) > 3):
             print(f"string = {string}")
@@ -66,9 +71,10 @@ class ButtonHandler:
         
         
         if checkInternet():
-            cmd = "fswebcam -d /dev/video0 -r 2500x2500 -v -S 10 --set brightness=100% --no-banner " + INPUT_IMAGE_PATH
-            p = self.create(cmd)
-            p.wait()
+            if usecam:
+                cmd = "fswebcam -d /dev/video0 -r 2500x2500 -v -S 10 --set brightness=100% --no-banner " + INPUT_IMAGE_PATH
+                p = self.create(cmd)
+                p.wait()
             #cap = cv2.VideoCapture(0)
             #cap.set(cv2.CAP_PROP_FRAME_WIDTH,2592)
             #cap.set(cv2.CAP_PROP_FRAME_HEIGHT,1944)
@@ -82,6 +88,7 @@ class ButtonHandler:
             
             #img = cv2.imread(INPUT_IMAGE_PATH)
             
+            #check with pi4
             #if blurCheck(img):
             #    self.create("sudo mpg321 ./audios/blurry.mp3")
                 
